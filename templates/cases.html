@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}PhishGuard — SOC Case Management{% endblock %}
+{% block content %}
+
+<div class="cases-header-flex">
+  <div>
+    <h1>SOC Case Management</h1>
+    <div class="meta">Manage investigation workflows, triage assignments, and threat containment.</div>
+  </div>
+  <div class="filter-pills">
+    <a href="{{ url_for('cases_view') }}" class="filter-pill {% if not current_status %}active{% endif %}">All</a>
+    <a href="{{ url_for('cases_view', status='OPEN') }}" class="filter-pill {% if current_status == 'OPEN' %}active{% endif %}">Open</a>
+    <a href="{{ url_for('cases_view', status='TRIAGED') }}" class="filter-pill {% if current_status == 'TRIAGED' %}active{% endif %}">Triaged</a>
+    <a href="{{ url_for('cases_view', status='INVESTIGATING') }}" class="filter-pill {% if current_status == 'INVESTIGATING' %}active{% endif %}">Investigating</a>
+    <a href="{{ url_for('cases_view', status='CONTAINED') }}" class="filter-pill {% if current_status == 'CONTAINED' %}active{% endif %}">Contained</a>
+    <a href="{{ url_for('cases_view', status='CLOSED') }}" class="filter-pill {% if current_status == 'CLOSED' %}active{% endif %}">Closed</a>
+    <a href="{{ url_for('cases_view', status='FALSE_POSITIVE') }}" class="filter-pill {% if current_status == 'FALSE_POSITIVE' %}active{% endif %}">False Positive</a>
+  </div>
+</div>
+
+<div class="panel">
+  {% if cases %}
+    <div class="cases-table-wrap">
+      <table class="soc-table">
+        <thead>
+          <tr>
+            <th>Case ID</th>
+            <th>Subject</th>
+            <th>Severity</th>
+            <th>Verdict</th>
+            <th>Score</th>
+            <th>Status</th>
+            <th>Assigned</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in cases %}
+          <tr onclick="window.location='{{ url_for('report', analysis_id=c.id) }}'">
+            <td class="font-mono">{{ c.case_number or 'CASE-' ~ '%04d' % c.id }}</td>
+            <td class="subject-cell">{{ c.title or '(no subject)' }}</td>
+            <td><span class="badge badge-{{ c.severity|lower }}">{{ c.severity }}</span></td>
+            <td><span class="verdict-tag {{ c.verdict|lower|replace(' ', '-') }}">{{ c.verdict }}</span></td>
+            <td class="font-mono score-cell">{{ c.score }}/100</td>
+            <td><span class="status-pill status-{{ c.status|lower }}">{{ c.status }}</span></td>
+            <td class="font-mono">{{ c.assigned_analyst or 'unassigned' }}</td>
+            <td class="meta font-mono">{{ c.created_at[:16] if c.created_at else '' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty">No cases found matching the selected filter.</div>
+  {% endif %}
+</div>
+
+{% endblock %}

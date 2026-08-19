@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  phishguard-web:
+    build: .
+    container_name: phishguard-soc
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - PHISHGUARD_ENV=production
+      - SECRET_KEY=soc-secret-key-production-replace-me
+      - DATABASE_PATH=/app/data/phishguard.db
+    volumes:
+      - phishguard-data:/app/data
+
+volumes:
+  phishguard-data:

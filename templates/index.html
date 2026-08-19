@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}PhishGuard — SOC Dashboard{% endblock %}
+{% block content %}
+
+<!-- Executive Top Metric Cards -->
+<div class="stats-grid">
+  <div class="stat total">
+    <div class="num">{{ summary.total or 0 }}</div>
+    <div class="label">Total Analyzed</div>
+  </div>
+  <div class="stat malicious">
+    <div class="num">{{ summary.phishing or 0 }}</div>
+    <div class="label">Phishing / Malicious</div>
+  </div>
+  <div class="stat suspicious">
+    <div class="num">{{ summary.suspicious or 0 }}</div>
+    <div class="label">Suspicious Alerts</div>
+  </div>
+  <div class="stat clean">
+    <div class="num">{{ summary.clean or 0 }}</div>
+    <div class="label">Verified Clean</div>
+  </div>
+  <div class="stat open-cases">
+    <div class="num">{{ summary.open_cases or 0 }}</div>
+    <div class="label">Open Cases</div>
+  </div>
+  <div class="stat critical">
+    <div class="num">{{ summary.critical_alerts or 0 }}</div>
+    <div class="label">Critical Priority</div>
+  </div>
+</div>
+
+<div class="dashboard-columns">
+  <!-- Left Column: Submit Drawer & Watcher -->
+  <div class="col-side">
+    <div class="panel">
+      <h2>Ingest Email For Triage</h2>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('paste')" type="button">Paste Raw Email</button>
+        <button class="tab-btn" onclick="showTab('upload')" type="button">Upload .eml</button>
+      </div>
+
+      <div id="tab-paste" class="tab-panel active">
+        <form method="post" action="{{ url_for('analyze') }}">
+          <label>RFC-5322 Raw Source (Headers + Body)</label>
+          <textarea name="raw_text" placeholder="From: ...&#10;Subject: ...&#10;Authentication-Results: ...&#10;&#10;Body content..."></textarea>
+          <button class="primary" type="submit">Run Full Triage Pipeline</button>
+        </form>
+      </div>
+
+      <div id="tab-upload" class="tab-panel">
+        <form method="post" action="{{ url_for('analyze') }}" enctype="multipart/form-data">
+          <label>.eml / RFC-822 File</label>
+          <input type="file" name="eml_file" accept=".eml,message/rfc822">
+          <button class="primary" type="submit">Upload &amp; Analyze</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- IMAP Mailbox Watcher Panel -->
+    <div class="panel">
+      <h2>Continuous Mailbox Monitor</h2>
+      {% if watcher.running %}
+        <div class="watch-status">
+          Monitoring <strong>{{ watcher.config.user }}</strong> / {{ watcher.config.folder }} every {{ watcher.config.interval }}s.
+          {% if watcher.last_check %}<br><span class="meta">Last check: {{ watcher.last_check[:19] }}</span>{% endif %}
+          {% if watcher.error %}<br><span class="error-text">Error: {{ watcher.error }}</span>{% endif %}
+        </div>
+        <form method="post" action="{{ url_for('watch_stop') }}" style="margin-top: 12px;">
+          <button class="ghost stop" type="submit">Stop Monitoring</button>
+        </form>
+      {% else %}
+        <form method="post" action="{{ url_for('watch_start') }}">
+          <div class="field-row">
+            <div>
+              <label>IMAP Server</label>
+              <input type="text" name="imap_server" placeholder="imap.gmail.com">
+            </div>
+            <div>
+              <label>Folder</label>
+              <input type="text" name="folder" value="INBOX">
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label>Email Address</label>
+              <input type="text" name="user" placeholder="you@domain.com">
+            </div>
+            <div>
+              <label>App Password</label>
+              <input type="password" name="password" placeholder="App password">
+            </div>
+          </div>
+          <label>Poll Interval (seconds)</label>
+          <input type="number" name="interval" value="30" style="max-width: 120px;">
+          <button class="primary" type="submit">Start Watcher</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Right Column: Recent Cases & Campaign Clusters -->
+  <div class="col-main">
+    {% if campaigns %}
+    <div class="panel campaign-panel">
+      <h2>Threat Campaign Clusters ({{ campaigns|length }})</h2>
+      <div class="campaign-list">
+        {% for camp in campaigns[:3] %}
+        <div class="campaign-card">
+          <div class="campaign-head">
+            <span class="campaign-title">{{ camp.name }}</span>
+            <span class="badge badge-{{ camp.severity|lower }}">{{ camp.case_count }} linked cases</span>
+          </div>
+          <div class="campaign-meta">
+            Shared indicators: {{ camp.shared_indicators|join(', ') }}<br>
+            Activity window: {{ camp.first_seen[:10] }} to {{ camp.last_seen[:10] }}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="panel">
+      <div class="panel-header-flex">
+        <h2>Recent Triage Cases</h2>
+        <a href="{{ url_for('cases_view') }}" class="view-all-link">View All Cases &rarr;</a>
+      </div>
+      {% if cases %}
+        <div class="cases-table-wrap">
+          <table class="soc-table">
+            <thead>
+              <tr>
+                <th>Case ID</th>
+                <th>Subject</th>
+                <th>Severity</th>
+                <th>Verdict</th>
+                <th>Score</th>
+                <th>Status</th>
+                <th>Analyzed</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in cases[:15] %}
+              <tr onclick="window.location='{{ url_for('report', analysis_id=c.id) }}'">
+                <td class="font-mono">{{ c.case_number or 'CASE-' ~ '%04d' % c.id }}</td>
+                <td class="subject-cell">{{ c.title or '(no subject)' }}</td>
+                <td><span class="badge badge-{{ c.severity|lower }}">{{ c.severity }}</span></td>
+                <td><span class="verdict-tag {{ c.verdict|lower|replace(' ', '-') }}">{{ c.verdict }}</span></td>
+                <td class="font-mono score-cell">{{ c.score }}/100</td>
+                <td><span class="status-pill status-{{ c.status|lower }}">{{ c.status }}</span></td>
+                <td class="meta font-mono">{{ c.created_at[:16] if c.created_at else '' }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="empty">No cases analyzed yet. Submit an email above to start triage.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

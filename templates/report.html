@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+{% block title %}{{ case.title }} — PhishGuard Investigation{% endblock %}
+{% block content %}
+{% set r = record.result or case.analysis.result if case.analysis else record.result %}
+{% set c = case %}
+
+<!-- Header Breadcrumb & Actions -->
+<div class="investigation-topbar">
+  <div class="breadcrumb">
+    <a href="{{ url_for('dashboard') }}">&larr; Dashboard</a> /
+    <a href="{{ url_for('cases_view') }}">Cases</a> /
+    <span class="current">{{ c.case_number or 'CASE-' ~ '%04d' % c.id }}</span>
+  </div>
+  <div class="export-actions">
+    <a href="{{ url_for('export_stix', case_id=c.id) }}" class="btn-export">Export STIX 2.1</a>
+    <a href="{{ url_for('export_sigma', case_id=c.id) }}" class="btn-export">Export Sigma Rule</a>
+    <a href="{{ url_for('export_csv', case_id=c.id) }}" class="btn-export">Export IOCs (CSV)</a>
+    <a href="{{ url_for('export_json', case_id=c.id) }}" class="btn-export">Export JSON</a>
+  </div>
+</div>
+
+<!-- Investigation Summary Header -->
+<div class="report-head panel">
+  <div class="report-main-info">
+    <div class="case-badge-strip">
+      <span class="font-mono case-id-tag">{{ c.case_number or 'CASE-' ~ '%04d' % c.id }}</span>
+      <span class="badge badge-{{ c.severity|lower }}">{{ c.severity }}</span>
+      <span class="status-pill status-{{ c.status|lower }}">{{ c.status }}</span>
+      <span class="confidence-tag">Confidence: {{ c.confidence or r.confidence or 'HIGH' }}</span>
+    </div>
+    <h1>{{ c.title or r.subject or '(no subject)' }}</h1>
+    <div class="meta">
+      Sender: <strong class="font-mono text-white">{{ r.from_addr or 'unknown' }}</strong> &middot;
+      Ingested: <span class="font-mono">{{ c.created_at[:19] if c.created_at else '' }}</span> &middot;
+      Source: <span class="font-mono">{{ c.source }}</span>
+    </div>
+  </div>
+  <div class="score-block">
+    <div class="score font-mono">{{ r.score }}<span class="score-denom">/100</span></div>
+    <div class="verdict-tag {{ r.verdict|lower|replace(' ', '-') }}">{{ r.verdict }}</div>
+  </div>
+</div>
+
+<!-- Investigation Tabs Navigation -->
+<div class="investigation-tabs">
+  <button class="inv-tab-btn active" onclick="showInvTab('overview')">Overview</button>
+  <button class="inv-tab-btn" onclick="showInvTab('headers')">Headers &amp; Auth</button>
+  <button class="inv-tab-btn" onclick="showInvTab('hops')">Received Chain ({{ r.received_chain.hops|length if r.received_chain else 0 }})</button>
+  <button class="inv-tab-btn" onclick="showInvTab('urls')">URLs ({{ r.url_analysis|length if r.url_analysis else 0 }})</button>
+  <button class="inv-tab-btn" onclick="showInvTab('attachments')">Attachments ({{ r.attachment_analysis.attachments|length if r.attachment_analysis else 0 }})</button>
+  <button class="inv-tab-btn" onclick="showInvTab('iocs')">IOCs ({{ r.normalized_iocs|length if r.normalized_iocs else 0 }})</button>
+  <button class="inv-tab-btn" onclick="showInvTab('mitre')">MITRE ATT&amp;CK</button>
+  <button class="inv-tab-btn" onclick="showInvTab('campaigns')">Campaigns</button>
+  <button class="inv-tab-btn" onclick="showInvTab('timeline')">Audit Timeline</button>
+  <button class="inv-tab-btn" onclick="showInvTab('actions')">Analyst Actions</button>
+</div>
+
+<!-- Macro for findings -->
+{% macro findings_list(findings) %}
+  {% if findings %}
+    {% for f in findings %}
+      <div class="finding {{ 'bad' if f.flag == true else ('good' if f.flag == false else 'neutral') }}">
+        <span class="mark">{{ '[!!]' if f.flag == true else ('[ok]' if f.flag == false else '[--]') }}</span>
+        <span class="finding-text">{{ f.text }}</span>
+        {% if f.weight %}<span class="weight">+{{ f.weight }}</span>{% endif %}
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="meta" style="padding: 6px 0;">No specific findings in this category.</div>
+  {% endif %}
+{% endmacro %}
+
+<!-- TAB 1: OVERVIEW -->
+<div id="inv-tab-overview" class="inv-tab-panel active">
+  <!-- Forensic Risk Pillars -->
+  {% if r.risk_pillars %}
+  <div class="panel">
+    <h2>Forensic Risk Pillars (0-100)</h2>
+    <div class="pillars-grid">
+      <div class="pillar-card">
+        <div class="pillar-title">Identity Risk</div>
+        <div class="pillar-val font-mono">{{ r.risk_pillars.identity_risk }}</div>
+        <div class="progress-bar"><div class="fill" style="width: {{ r.risk_pillars.identity_risk }}%;"></div></div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-title">URL &amp; Link Risk</div>
+        <div class="pillar-val font-mono">{{ r.risk_pillars.url_risk }}</div>
+        <div class="progress-bar"><div class="fill" style="width: {{ r.risk_pillars.url_risk }}%;"></div></div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-title">Content &amp; Lures</div>
+        <div class="pillar-val font-mono">{{ r.risk_pillars.content_risk }}</div>
+        <div class="progress-bar"><div class="fill" style="width: {{ r.risk_pillars.content_risk }}%;"></div></div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-title">Attachment Risk</div>
+        <div class="pillar-val font-mono">{{ r.risk_pillars.attachment_risk }}</div>
+        <div class="progress-bar"><div class="fill" style="width: {{ r.risk_pillars.attachment_risk }}%;"></div></div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-title">Threat Intelligence</div>
+        <div class="pillar-val font-mono">{{ r.risk_pillars.threat_intel_risk }}</div>
+        <div class="progress-bar"><div class="fill" style="width: {{ r.risk_pillars.threat_intel_risk }}%;"></div></div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-title">Behavioral / Evasion</div>
+        <div class="pillar-val font-mono">{{ r.risk_pillars.behavioral_risk }}</div>
+        <div class="progress-bar"><div class="fill" style="width: {{ r.risk_pillars.behavioral_risk }}%;"></div></div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Evidence Summary -->
+  {% if r.why_suspicious %}
+  <div class="panel highlight-panel">
+    <h2>Why is this suspicious? (Evidence Summary)</h2>
+    <ul class="why-list">
+      {% for item in r.why_suspicious %}
+        <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <!-- Analyst Recommendations -->
+  {% if r.recommendations %}
+  <div class="panel recs-panel">
+    <h2>Recommended SOC Analyst Actions</h2>
+    <div class="recs-list">
+      {% for rec in r.recommendations %}
+        <div class="rec-item font-mono">{{ rec }}</div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- TAB 2: HEADERS & AUTHENTICATION -->
+<div id="inv-tab-headers" class="inv-tab-panel">
+  <div class="panel">
+    <h2>Authentication Protocols (RFC-7489)</h2>
+    <div class="auth-grid">
+      <div class="auth-box">
+        <div class="auth-proto">SPF</div>
+        <div class="auth-status {{ r.header_analysis.auth_results.spf or 'none' }}">{{ (r.header_analysis.auth_results.spf or 'not evaluated')|upper }}</div>
+      </div>
+      <div class="auth-box">
+        <div class="auth-proto">DKIM</div>
+        <div class="auth-status {{ r.header_analysis.auth_results.dkim or 'none' }}">{{ (r.header_analysis.auth_results.dkim or 'not evaluated')|upper }}</div>
+      </div>
+      <div class="auth-box">
+        <div class="auth-proto">DMARC</div>
+        <div class="auth-status {{ r.header_analysis.auth_results.dmarc or 'none' }}">{{ (r.header_analysis.auth_results.dmarc or 'not evaluated')|upper }}</div>
+      </div>
+      <div class="auth-box">
+        <div class="auth-proto">ARC</div>
+        <div class="auth-status {{ r.header_analysis.auth_results.arc or 'none' }}">{{ (r.header_analysis.auth_results.arc or 'none')|upper }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Header Forensics &amp; Spoofing Checks</h2>
+    {{ findings_list(r.header_analysis.findings) }}
+  </div>
+
+  <div class="panel">
+    <h2>Sender / Routing Metadata</h2>
+    <div class="meta-table">
+      <div><strong>From:</strong> <span class="font-mono">{{ r.header_analysis.from_addr }}</span></div>
+      <div><strong>From Display Name:</strong> <span>{{ r.header_analysis.from_name }}</span></div>
+      <div><strong>Reply-To:</strong> <span class="font-mono">{{ r.header_analysis.reply_to_addr or '(not set)' }}</span></div>
+      <div><strong>Return-Path:</strong> <span class="font-mono">{{ r.header_analysis.return_path_addr or '(not set)' }}</span></div>
+      <div><strong>Message-ID:</strong> <span class="font-mono">{{ r.header_analysis.message_id or '(missing)' }}</span></div>
+      <div><strong>Date:</strong> <span class="font-mono">{{ r.header_analysis.date or '(missing)' }}</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 3: RECEIVED CHAIN -->
+<div id="inv-tab-hops" class="inv-tab-panel">
+  <div class="panel">
+    <h2>Hop-by-Hop Received Chain Trace</h2>
+    {% if r.received_chain and r.received_chain.hops %}
+      <div class="originating-summary">
+        Originating External Relay IP: <strong>{{ r.received_chain.originating_ip or 'unknown' }}</strong> (Hop #1)
+      </div>
+      <div class="hop-timeline">
+        {% for hop in r.received_chain.hops %}
+        <div class="hop-card {% if hop.ip == r.received_chain.originating_ip %}origin-hop{% endif %}">
+          <div class="hop-header">
+            <span class="hop-badge">Hop #{{ hop.hop_index }}</span>
+            <span class="hop-ip font-mono">{{ hop.ip or 'IP not recorded' }}</span>
+            <span class="badge {% if hop.is_internal %}badge-info{% else %}badge-high{% endif %}">
+              {{ 'Internal / Private' if hop.is_internal else 'External Relay' }}
+            </span>
+          </div>
+          <div class="hop-body font-mono">
+            From: {{ hop.from_host }} &rarr; By: {{ hop.by_host }}<br>
+            Protocol: {{ hop.protocol or 'standard' }} | Timestamp: {{ hop.timestamp or 'n/a' }}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty">No Received headers found in this message.</div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- TAB 4: URLS -->
+<div id="inv-tab-urls" class="inv-tab-panel">
+  <div class="panel">
+    <h2>Extracted URLs &amp; Live Safe Analysis</h2>
+    {% if r.url_analysis %}
+      {% for u in r.url_analysis %}
+      <div class="url-card">
+        <div class="url-card-head">
+          <div class="url-title-block">
+            <span class="url-href font-mono">{{ u.url }}</span>
+            <span class="domain-tag font-mono">Domain: {{ u.domain }}</span>
+          </div>
+          <div class="url-score-block">
+            <span class="verdict-tag {{ u.verdict|lower|replace(' ', '-') }}">{{ u.verdict }} &middot; {{ u.score }}/100</span>
+          </div>
+        </div>
+        <div class="url-findings">
+          {{ findings_list(u.findings) }}
+        </div>
+        {% if u.urlscan and u.urlscan.details and u.urlscan.details.screenshot_url %}
+        <div class="screenshot-wrap">
+          <div class="screenshot-label">URLScan.io Sandbox Screenshot:</div>
+          <img class="screenshot" src="{{ u.urlscan.details.screenshot_url }}" alt="Sandbox Screenshot">
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty">No URLs extracted from message body or HTML anchors.</div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- TAB 5: ATTACHMENTS -->
+<div id="inv-tab-attachments" class="inv-tab-panel">
+  <div class="panel">
+    <h2>Attachment Static Forensics</h2>
+    {% if r.attachment_analysis and r.attachment_analysis.attachments %}
+      {% for att in r.attachment_analysis.attachments %}
+      <div class="attachment-card {% if att.is_risky %}risky-att{% endif %}">
+        <div class="att-head">
+          <div>
+            <strong class="att-filename font-mono">{{ att.filename }}</strong>
+            <span class="badge {% if att.is_risky %}badge-critical{% else %}badge-clean{% endif %}">
+              {{ 'High Risk' if att.is_risky else 'Benign Extension' }}
+            </span>
+          </div>
+          <div class="font-mono att-size">{{ att.size }} bytes</div>
+        </div>
+        <div class="att-hashes font-mono">
+          SHA-256: {{ att.sha256 or 'n/a' }}<br>
+          SHA-1:   {{ att.sha1 or 'n/a' }}<br>
+          Entropy: {{ att.entropy or 'n/a' }} / 8.0 &middot; Magic Type: {{ att.magic_description or 'unspecified' }}
+        </div>
+        <div class="att-findings">
+          {{ findings_list(att.findings) }}
+        </div>
+
+        {% if att.archive_details and att.archive_details.is_archive %}
+        <div class="archive-tree">
+          <h4>Archive Internal Structure (Safe In-Memory Inspection)</h4>
+          <div class="archive-meta">Total Files: {{ att.archive_details.total_files }} | Encrypted: {{ att.archive_details.is_encrypted }}</div>
+          <ul class="tree-list font-mono">
+            {% for entry in att.archive_details.entries %}
+              <li class="{% if entry.is_risky %}danger-entry{% endif %}">
+                {{ entry.filename }} ({{ entry.size }} bytes) {% if entry.is_risky %}&mdash; <strong>DANGEROUS PAYLOAD</strong>{% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty">No attachments detected in this message.</div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- TAB 6: IOCS -->
+<div id="inv-tab-iocs" class="inv-tab-panel">
+  <div class="panel">
+    <div class="panel-header-flex">
+      <h2>Normalized Indicators of Compromise (IOCs)</h2>
+      <a href="{{ url_for('export_csv', case_id=c.id) }}" class="btn-export">Download CSV</a>
+    </div>
+    {% if r.normalized_iocs %}
+    <table class="soc-table font-mono">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Indicator Value</th>
+          <th>Source</th>
+          <th>Reputation</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ioc in r.normalized_iocs %}
+        <tr>
+          <td><span class="ioc-type-pill">{{ ioc.type }}</span></td>
+          <td class="ioc-val-cell">{{ ioc.value }}</td>
+          <td>{{ ioc.source }}</td>
+          <td>{{ ioc.reputation }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <div class="empty">No IOCs extracted.</div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- TAB 7: MITRE ATT&CK -->
+<div id="inv-tab-mitre" class="inv-tab-panel">
+  <div class="panel">
+    <h2>MITRE ATT&amp;CK Technique Mappings</h2>
+    {% if r.mitre %}
+    <div class="mitre-grid">
+      {% for m in r.mitre %}
+      <div class="mitre-card">
+        <div class="mitre-card-head">
+          <span class="mitre-id font-mono">{{ m.id }}</span>
+          <span class="mitre-status font-mono">{{ m.status }}</span>
+        </div>
+        <div class="mitre-name">{{ m.name }}</div>
+        <div class="mitre-evidence">{{ m.evidence }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+      <div class="empty">No specific MITRE ATT&amp;CK techniques identified.</div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- TAB 8: CAMPAIGN CORRELATION -->
+<div id="inv-tab-campaigns" class="inv-tab-panel">
+  <div class="panel">
+    <h2>Historical Campaign Clustering</h2>
+    {% if linked_campaign %}
+      <div class="campaign-highlight-card">
+        <h3>{{ linked_campaign.name }}</h3>
+        <p>This case is linked to <strong>{{ linked_campaign.case_count }}</strong> related cases in the SOC database sharing common infrastructure.</p>
+        <div class="meta font-mono">
+          Shared Indicators: {{ linked_campaign.shared_indicators|join(', ') }}<br>
+          Linked Case IDs: {{ linked_campaign.case_ids|join(', ') }}
+        </div>
+      </div>
+    {% else %}
+      <div class="empty">No historical campaign relationships detected for this case.</div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- TAB 9: AUDIT TIMELINE -->
+<div id="inv-tab-timeline" class="inv-tab-panel">
+  <div class="panel">
+    <h2>Tamper-Evident Investigation Audit Log</h2>
+    {% if case.audit_logs %}
+    <div class="audit-timeline">
+      {% for entry in case.audit_logs %}
+      <div class="audit-entry">
+        <div class="audit-time font-mono">{{ entry.timestamp[:19] }}</div>
+        <div class="audit-body">
+          <strong>{{ entry.user }}</strong> executed <code>{{ entry.action }}</code>: {{ entry.details }}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+      <div class="empty">No audit events recorded yet.</div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- TAB 10: ANALYST ACTIONS & NOTES -->
+<div id="inv-tab-actions" class="inv-tab-panel">
+  <div class="dashboard-columns">
+    <div class="col-side">
+      <div class="panel">
+        <h2>Update Case Status</h2>
+        <form method="post" action="{{ url_for('update_status', case_id=c.id) }}">
+          <label>Status</label>
+          <select name="status">
+            <option value="OPEN" {% if c.status == 'OPEN' %}selected{% endif %}>OPEN</option>
+            <option value="TRIAGED" {% if c.status == 'TRIAGED' %}selected{% endif %}>TRIAGED</option>
+            <option value="INVESTIGATING" {% if c.status == 'INVESTIGATING' %}selected{% endif %}>INVESTIGATING</option>
+            <option value="CONTAINED" {% if c.status == 'CONTAINED' %}selected{% endif %}>CONTAINED</option>
+            <option value="CLOSED" {% if c.status == 'CLOSED' %}selected{% endif %}>CLOSED</option>
+            <option value="FALSE_POSITIVE" {% if c.status == 'FALSE_POSITIVE' %}selected{% endif %}>FALSE POSITIVE</option>
+          </select>
+          <label>Reason / Transition Notes</label>
+          <textarea name="reason" placeholder="Explain state change..."></textarea>
+          <button class="primary" type="submit">Update Status</button>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2>Override Case Verdict</h2>
+        <form method="post" action="{{ url_for('update_verdict', case_id=c.id) }}">
+          <label>Verdict</label>
+          <select name="verdict">
+            <option value="CLEAN" {% if c.verdict == 'CLEAN' %}selected{% endif %}>CLEAN</option>
+            <option value="SUSPICIOUS" {% if c.verdict == 'SUSPICIOUS' %}selected{% endif %}>SUSPICIOUS</option>
+            <option value="PHISHING" {% if c.verdict == 'PHISHING' %}selected{% endif %}>PHISHING</option>
+            <option value="MALICIOUS" {% if c.verdict == 'MALICIOUS' %}selected{% endif %}>MALICIOUS</option>
+          </select>
+          <label>Justification</label>
+          <textarea name="reason" placeholder="State reasons for verdict override..."></textarea>
+          <button class="primary" type="submit">Confirm Verdict</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-main">
+      <div class="panel">
+        <h2>Add Investigation Note</h2>
+        <form method="post" action="{{ url_for('add_note', case_id=c.id) }}">
+          <textarea name="note" placeholder="Enter findings, containment steps, or escalation notes..."></textarea>
+          <button class="primary" type="submit">Save Note</button>
+        </form>
+
+        <h3 style="margin-top: 24px;">Investigation Notes History</h3>
+        {% if case.notes %}
+          <div class="notes-list">
+            {% for n in case.notes %}
+            <div class="note-card">
+              <div class="note-meta font-mono">{{ n.author }} &middot; {{ n.created_at[:19] }}</div>
+              <div class="note-content">{{ n.content }}</div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="meta" style="margin-top: 10px;">No notes added to this case yet.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

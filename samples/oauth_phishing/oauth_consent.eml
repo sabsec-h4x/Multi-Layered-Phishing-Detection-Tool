@@ -1,0 +1,22 @@
+From: "Microsoft 365 Security" <admin@corporate-portal-login.xyz>
+To: target-employee@company.com
+Subject: Action Required: Review Required Application Permissions for Microsoft 365
+Date: Wed, 19 Aug 2026 12:00:00 +0000
+Message-ID: <oauth-lure-992@corporate-portal-login.xyz>
+Authentication-Results: spf=fail dkim=fail dmarc=fail
+Content-Type: text/html; charset="utf-8"
+
+<html>
+<head><title>Microsoft Consent Verification</title></head>
+<body>
+  <h2>Microsoft 365 App Authorization Update</h2>
+  <p>An enterprise application is requesting authorization to connect with your corporate Microsoft 365 tenant.</p>
+  <p>To authorize this connection or complete single sign-on, click below:</p>
+  <p>
+    <a href="https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=d3b07384-d113-49a0-9c3e-4c0ef413b59a&response_type=code&scope=Mail.ReadWrite.All%20Files.ReadWrite.All%20offline_access">
+      https://login.microsoftonline.com/authorize/permissions
+    </a>
+  </p>
+  <p>Or alternatively, enter your device pairing code via <a href="https://microsoft.com/devicelogin">https://microsoft.com/devicelogin</a> using user code <strong>GH89-XZ12</strong>.</p>
+</body>
+</html>

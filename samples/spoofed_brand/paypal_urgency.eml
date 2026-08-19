@@ -1,0 +1,25 @@
+From: "PayPal Service Team" <billing-notice@paypa1-security-desk.top>
+To: user@example.com
+Subject: Notice of Fraud Alert: Your PayPal Account will be restricted
+Date: Wed, 19 Aug 2026 12:30:00 +0000
+Message-ID: <pp-fraud-alert-883@paypa1-security-desk.top>
+Reply-To: dispute-center@secure-fraud-ticket.net
+Authentication-Results: spf=fail dkim=fail dmarc=fail
+Content-Type: text/html; charset="utf-8"
+
+<html>
+<head><title>PayPal Security Notification</title></head>
+<body>
+  <div style="font-family: Arial, sans-serif;">
+    <h3>Unusual login activity detected on your PayPal Account</h3>
+    <p>Dear Customer,</p>
+    <p>We recorded an unrecognized transaction for $789.99 USD from Moscow, Russia. If you did not initiate this transfer, your account must be verified immediately.</p>
+    <p>Please resolve this dispute and secure your account credentials within 12 hours:</p>
+    <p>
+      <!-- Text displays official PayPal domain, but href points to attacker infrastructure -->
+      <a href="https://paypa1-security-desk.top/login.php?client_id=account_confirm">https://www.paypal.com/security/disputes/confirm-identity</a>
+    </p>
+    <p>Thank you,<br>PayPal Customer Safety Team</p>
+  </div>
+</body>
+</html>

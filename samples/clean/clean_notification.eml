@@ -1,0 +1,15 @@
+From: GitHub <notifications@github.com>
+To: developer@example.com
+Subject: [GitHub] Security advisory: Dependabot alert resolved
+Date: Wed, 19 Aug 2026 10:00:00 +0000
+Message-ID: <github/dependabot/12345@github.com>
+Authentication-Results: spf=pass dkim=pass dmarc=pass
+Content-Type: text/plain; charset="utf-8"
+
+Hi developer,
+
+Dependabot has resolved security advisory #42 on your repository.
+You can view the updated dependencies in your repository security tab.
+
+Thanks,
+The GitHub Team

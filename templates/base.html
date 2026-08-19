@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}PhishGuard SOC Platform{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-nav">
+      <a href="{{ url_for('dashboard') }}" class="brand">
+        <span class="mark">▲</span> PhishGuard <span class="sub">/ SOC Triage Platform</span>
+      </a>
+      <nav class="main-nav">
+        <a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a>
+        <a href="{{ url_for('cases_view') }}" class="nav-link">Cases</a>
+      </nav>
+    </div>
+    <div class="topbar-actions">
+      <a href="{{ url_for('dashboard') }}" class="watcher-pill">
+        <span class="dot {% if watcher and watcher.running %}live{% endif %}"></span>
+        {% if watcher and watcher.running %}Monitoring Mailbox{% else %}Watcher Idle{% endif %}
+      </a>
+      <div class="analyst-badge">Analyst: Tier-1 SOC</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

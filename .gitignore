@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+
+# Environment and Secrets
+.env
+.env.txt
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+
+# Database and Data
+*.db
+*.sqlite
+*.sqlite3
+phishguard.db
+
+# Logs and Runtime
+*.log
+logs/
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Uploads and temporary artifacts
+uploads/
+scratch/
+temp/

