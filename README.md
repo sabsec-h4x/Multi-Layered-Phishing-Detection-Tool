@@ -123,31 +123,31 @@ BENCHMARK METRICS:
 ### 1. Phishing Triage & 6-Pillar Risk Scoring (CASE-0020)
 > *Comprehensive risk pillar breakdown, brand impersonation alerts, and recommended SOC analyst actions for a spoofed PayPal phishing lure.*
 <p align="center">
-  <img src="docs/screenshots/01_paypal_phishing_overview.png" alt="Phishing Overview & Risk Pillars" width="950" />
+  <img src="docs/screenshots/01_paypal_phishing_overview.png" alt="Phishing Overview & Risk Pillars" width="100%" />
 </p>
 
 ### 2. Modern OAuth Consent & Device-Code Analysis (CASE-0021)
 > *Detection of high-risk OAuth scopes (`Mail.ReadWrite.All`, `Files.ReadWrite.All`), `/devicelogin` lures, and live TLS certificate inspection.*
 <p align="center">
-  <img src="docs/screenshots/02_m365_oauth_phishing_urls.png" alt="OAuth & URL Analysis" width="950" />
+  <img src="docs/screenshots/02_m365_oauth_phishing_urls.png" alt="OAuth & URL Analysis" width="100%" />
 </p>
 
 ### 3. Attachment Forensics & Normalized IOC Extraction (CASE-0022)
 > *Static inspection of malicious double extensions (`invoice_receipt.pdf.exe`), SHA-256 / SHA-1 / MD5 hash generation, and one-click STIX/Sigma export.*
 <p align="center">
-  <img src="docs/screenshots/03_attachment_ioc_extraction.png" alt="IOC Extraction & Hashes" width="950" />
+  <img src="docs/screenshots/03_attachment_ioc_extraction.png" alt="IOC Extraction & Hashes" width="100%" />
 </p>
 
 ### 4. Header Forensics & Sender Routing Alignment (CASE-0023)
 > *Deep RFC-5322 header inspection, RFC-7489 authentication evaluation, and CEO executive impersonation detection.*
 <p align="center">
-  <img src="docs/screenshots/04_bec_header_forensics.png" alt="Header Forensics & BEC Triage" width="950" />
+  <img src="docs/screenshots/04_bec_header_forensics.png" alt="Header Forensics & BEC Triage" width="100%" />
 </p>
 
 ### 5. Benign Traffic Verification & Trust Discount (CASE-0024)
 > *Evaluation of legitimate enterprise emails with zero false positives and automated benign closure recommendations.*
 <p align="center">
-  <img src="docs/screenshots/05_benign_clean_verification.png" alt="Benign Email Verification" width="950" />
+  <img src="docs/screenshots/05_benign_clean_verification.png" alt="Benign Email Verification" width="100%" />
 </p>
 
 ---
