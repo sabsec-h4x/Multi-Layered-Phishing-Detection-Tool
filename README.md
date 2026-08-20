@@ -1,4 +1,4 @@
-# 🛡️ PhishGuard — Enterprise Email Phishing Triage & Threat Intelligence Platform
+# PhishGuard — Enterprise Email Phishing Triage & Threat Intelligence Platform
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.13-blue?style=for-the-badge&logo=python" alt="Python Version" />
@@ -11,7 +11,7 @@
 
 ---
 
-## 📌 Executive Summary
+##  Executive Summary
 
 Modern enterprise phishing attacks have evolved far beyond simple spam. Threat actors routinely leverage **display name spoofing**, **anchor-text mismatches**, **IDN homograph / Punycode lookalikes**, **OAuth application consent abuse**, **device-code lures (`/devicelogin`)**, and **HTML smuggling** to bypass traditional secure email gateways (SEGs).
 
@@ -19,7 +19,7 @@ Modern enterprise phishing attacks have evolved far beyond simple spam. Threat a
 
 ---
 
-## 🏛️ Platform Architecture
+##  Platform Architecture
 
 ```mermaid
 graph TD
@@ -62,22 +62,22 @@ graph TD
 
 ---
 
-## ⚡ Core Forensic & Detection Engines
+##  Core Forensic & Detection Engines
 
 | Module | Forensic Capabilities |
 |---|---|
-| **🛡️ SSRF-Protected Client** | Blocks RFC 1918 private subnets (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`), loopback (`127.0.0.1`), link-local (`169.254.169.254`), and cloud metadata services. Enforces per-hop redirect validation and response byte caps. |
-| **🔍 URL & Mismatch Engine** | Unmasks **Anchor-Text Mismatches** (e.g. text shows `paypal.com` but link goes to `paypa1.top`). Detects CSS-hidden links, integer/hex/octal IP formats (`2130706433`), userinfo `@` abuse, and high-risk TLDs. |
-| **🏷️ Brand Impersonation** | Multi-brand catalog (30+ brands including Microsoft, PayPal, Google, Apple, Netflix, DocuSign). Detects Levenshtein typosquatting, Cyrillic IDN homographs, brand subdomains, and credential login forms. |
-| **✉️ Header & Auth Alignment** | Evaluates RFC-7489 **SPF, DKIM, DMARC, and ARC** authentication. Flags From vs. Reply-To domain deviations and display name masquerading. |
-| **🌐 Received Chain Tracer** | Reconstructs the complete relay route hop-by-hop to isolate the true **originating external IP address**, reverse DNS, and internal hops. |
-| **📦 Attachment & Archive Forensics** | Multi-hashing (**SHA256, SHA1, MD5**), Shannon entropy, and **Magic Byte true MIME detection** to catch file masquerading (e.g. `invoice.pdf.exe`). Safely inspects ZIP/TAR internal file trees in-memory without disk detonation. |
-| **⚡ Modern Threat Vectors** | Identifies **OAuth Consent Phishing** with high-privilege scopes (`Mail.ReadWrite.All`, `offline_access`), **Device-Code Phishing** (`/devicelogin`), **HTML Smuggling** (Blob dynamic construction), and **ClickFix / Fake CAPTCHA** clipboard lures. |
-| **🧠 Explainable Multi-Pillar Risk** | Aggregates risk across **6 distinct pillars** (Identity, URL, Content, Attachment, Threat Intel, Behavioral) with clear evidence justifications and actionable SOC analyst playbooks. |
+| ** SSRF-Protected Client** | Blocks RFC 1918 private subnets (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`), loopback (`127.0.0.1`), link-local (`169.254.169.254`), and cloud metadata services. Enforces per-hop redirect validation and response byte caps. |
+| ** URL & Mismatch Engine** | Unmasks **Anchor-Text Mismatches** (e.g. text shows `paypal.com` but link goes to `paypa1.top`). Detects CSS-hidden links, integer/hex/octal IP formats (`2130706433`), userinfo `@` abuse, and high-risk TLDs. |
+| ** Brand Impersonation** | Multi-brand catalog (30+ brands including Microsoft, PayPal, Google, Apple, Netflix, DocuSign). Detects Levenshtein typosquatting, Cyrillic IDN homographs, brand subdomains, and credential login forms. |
+| ** Header & Auth Alignment** | Evaluates RFC-7489 **SPF, DKIM, DMARC, and ARC** authentication. Flags From vs. Reply-To domain deviations and display name masquerading. |
+| ** Received Chain Tracer** | Reconstructs the complete relay route hop-by-hop to isolate the true **originating external IP address**, reverse DNS, and internal hops. |
+| ** Attachment & Archive Forensics** | Multi-hashing (**SHA256, SHA1, MD5**), Shannon entropy, and **Magic Byte true MIME detection** to catch file masquerading (e.g. `invoice.pdf.exe`). Safely inspects ZIP/TAR internal file trees in-memory without disk detonation. |
+| ** Modern Threat Vectors** | Identifies **OAuth Consent Phishing** with high-privilege scopes (`Mail.ReadWrite.All`, `offline_access`), **Device-Code Phishing** (`/devicelogin`), **HTML Smuggling** (Blob dynamic construction), and **ClickFix / Fake CAPTCHA** clipboard lures. |
+| ** Explainable Multi-Pillar Risk** | Aggregates risk across **6 distinct pillars** (Identity, URL, Content, Attachment, Threat Intel, Behavioral) with clear evidence justifications and actionable SOC analyst playbooks. |
 
 ---
 
-## 🎯 Grounded MITRE ATT&CK® Mapping
+##  Grounded MITRE ATT&CK® Mapping
 
 | Technique ID | Technique Name | Tactic | Status | Evidence Grounding |
 |:---:|---|:---:|:---:|---|
@@ -91,7 +91,7 @@ graph TD
 
 ---
 
-## 📊 Evaluation & Benchmark Results
+##  Evaluation & Benchmark Results
 
 PhishGuard includes an automated evaluation suite (`scripts/benchmark.py`) tested against realistic clean and malicious corpora:
 
@@ -118,7 +118,7 @@ BENCHMARK METRICS:
 
 ---
 
-## 📸 Visual SOC Investigation Showcase
+##  Visual SOC Investigation Showcase
 
 ### 1. Phishing Triage & 6-Pillar Risk Scoring (CASE-0020)
 > *Comprehensive risk pillar breakdown, brand impersonation alerts, and recommended SOC analyst actions for a spoofed PayPal phishing lure.*
@@ -152,7 +152,7 @@ BENCHMARK METRICS:
 
 ---
 
-## 🚀 Quickstart & Installation Guide
+##  Quickstart & Installation Guide
 
 ### 1. Clone the Repository
 ```bash
@@ -252,7 +252,7 @@ docker compose logs -f
 
 ---
 
-## 📁 Repository Structure
+##  Repository Structure
 
 ```
 phishguard/
@@ -310,8 +310,8 @@ phishguard/
 
 ---
 
-## ⚖️ License & Ethical Security Notice
+##  License & Ethical Security Notice
 
 This software is released under the **Apache 2.0 License**.
 
-> **⚠️ Disclaimer**: PhishGuard is designed exclusively for authorized defensive cyber security operations, threat hunting, incident triage, and educational/research purposes. Ingesting and analyzing real-world phishing lures should only be conducted in secure, isolated environments.
+> ** Disclaimer**: PhishGuard is designed exclusively for authorized defensive cyber security operations, threat hunting, incident triage, and educational/research purposes. Ingesting and analyzing real-world phishing lures should only be conducted in secure, isolated environments.
