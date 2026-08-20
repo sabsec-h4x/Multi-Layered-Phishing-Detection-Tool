@@ -1,4 +1,4 @@
-# PhishGuard — Enterprise Email Phishing Triage & Threat Intelligence Platform
+# Phishdashh — Enterprise Email Phishing Triage & Threat Intelligence Platform
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.13-blue?style=for-the-badge&logo=python" alt="Python Version" />
@@ -156,8 +156,8 @@ BENCHMARK METRICS:
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/YOUR_USERNAME/phishguard.git
-cd phishguard
+git clone https://github.com/sabsec-h4x/Multi-Layered-Phishing-Detection-Tool.git
+cd Multi-Layered-Phishing-Detection-Tool
 ```
 
 ### 2. Set Up Virtual Environment & Dependencies
@@ -223,7 +223,7 @@ python cli.py watch --imap-server imap.gmail.com --user soc@company.com --passwo
 
 ---
 
-## 🔌 REST API v1 Reference
+##  REST API v1 Reference
 
 | Method | Endpoint | Description |
 |:---:|---|---|
@@ -240,7 +240,7 @@ python cli.py watch --imap-server imap.gmail.com --user soc@company.com --passwo
 
 ---
 
-## 🐳 Docker Deployment
+##  Docker Deployment
 
 ```bash
 # Build and start the container
@@ -314,4 +314,4 @@ phishguard/
 
 This software is released under the **Apache 2.0 License**.
 
-> ** Disclaimer**: PhishGuard is designed exclusively for authorized defensive cyber security operations, threat hunting, incident triage, and educational/research purposes. Ingesting and analyzing real-world phishing lures should only be conducted in secure, isolated environments.
+> ** Disclaimer**: Phishdashh is designed exclusively for authorized defensive cyber security operations, threat hunting, incident triage, and educational/research purposes. Ingesting and analyzing real-world phishing lures should only be conducted in secure, isolated environments.
