@@ -538,7 +538,13 @@ def analyze_email(msg) -> Dict[str, Any]:
     attachments, URLs, modern attack vectors, categorized risk scoring,
     MITRE ATT&CK mapping, and IOC normalization.
     """
-    subject = msg.get("Subject", "(no subject)")
+    subject_raw = msg.get("Subject", "(no subject)")
+    try:
+        from email.header import decode_header, make_header
+        subject = str(make_header(decode_header(str(subject_raw)))) if "=?" in str(subject_raw) else str(subject_raw)
+    except Exception:
+        subject = str(subject_raw)
+
     body_text = extract_body_text(msg)
     raw_html = extract_raw_html(msg)
 

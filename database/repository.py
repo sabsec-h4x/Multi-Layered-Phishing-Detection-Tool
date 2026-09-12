@@ -232,7 +232,23 @@ class SOCRepository:
         else:
             rows = conn.execute("SELECT * FROM cases ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
         conn.close()
-        return [dict(r) for r in rows]
+
+        def clean_mime(t: str) -> str:
+            if not t or "=?" not in str(t):
+                return str(t)
+            try:
+                from email.header import decode_header, make_header
+                return str(make_header(decode_header(str(t))))
+            except Exception:
+                return str(t)
+
+        results = []
+        for r in rows:
+            d = dict(r)
+            if d.get("title"):
+                d["title"] = clean_mime(d["title"])
+            results.append(d)
+        return results
 
     def list_analyses(self, limit: int = 50) -> List[Dict[str, Any]]:
         """List analyses for backward-compatibility with legacy dashboard."""
