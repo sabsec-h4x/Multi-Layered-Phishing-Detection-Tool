@@ -80,10 +80,28 @@ def watch_inbox(imap_server: str,
                     status_dict["error"] = None
 
             except Exception as e:
-                err = f"Inbox check error: {e}"
+                err = f"Connection interrupted ({e}). Auto-reconnecting in 5s..."
                 print(f"[PhishGuard] {err}")
                 if status_dict:
                     status_dict["error"] = err
+                try:
+                    conn.logout()
+                except Exception:
+                    pass
+
+                # Auto-reconnection logic for long-running IMAP streams
+                reconnect_delay = 5
+                if stop_event and stop_event.is_set():
+                    break
+                time.sleep(reconnect_delay)
+                try:
+                    conn = imaplib.IMAP4_SSL(imap_server)
+                    conn.login(user, password)
+                    print(f"[PhishGuard] Successfully reconnected to {imap_server}!")
+                    if status_dict:
+                        status_dict["error"] = None
+                except Exception as rec_err:
+                    print(f"[PhishGuard] Reconnection attempt failed: {rec_err}")
 
             if stop_event:
                 stop_event.wait(interval)

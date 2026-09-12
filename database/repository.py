@@ -238,7 +238,10 @@ class SOCRepository:
                 return str(t)
             try:
                 from email.header import decode_header, make_header
-                return str(make_header(decode_header(str(t))))
+                raw = str(t).strip()
+                if raw.startswith("=?") and not raw.endswith("?="):
+                    raw = raw + "?="
+                return str(make_header(decode_header(raw)))
             except Exception:
                 return str(t)
 
